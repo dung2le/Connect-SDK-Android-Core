@@ -220,13 +220,30 @@ public class WebOSTVServiceSocketClient extends WebSocketClient implements Servi
     }
 
     private void setDefaultManifest() {
+        Context context = DiscoveryManager.getInstance().getContext();
+        PackageManager packageManager = context.getPackageManager();
+
+        // app Id
+        String appId = context.getPackageName();
+
+        // app Name
+        ApplicationInfo applicationInfo;
+        try {
+            applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), 0);
+        } catch (final NameNotFoundException e) {
+            applicationInfo = null;
+        }
+        String applicationName = (String) (applicationInfo != null ? packageManager.getApplicationLabel(applicationInfo) : "(unknown)");
+
         manifest = new JSONObject();
 
         try {
             manifest.put("manifestVersion", 1);
-//            manifest.put("appId", 1);
-//            manifest.put("vendorId", 1);
-//            manifest.put("localizedAppNames", 1);
+            manifest.put("appId", appId);
+            manifest.put("vendorId", "");
+            JSONObject localizedAppNames = new JSONObject();
+            localizedAppNames.put("", applicationName);
+            manifest.put("localizedAppNames", localizedAppNames);
             manifest.put("permissions",  convertStringListToJSONArray(permissions));
         } catch (JSONException e) {
             e.printStackTrace();
